@@ -1,0 +1,193 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>МорфоФон — разбор слова по составу</title>
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800;900&display=swap');
+:root{--ink:#25364e;--green:#26b98a;--orange:#f3a12b;--blue:#4b9fff;--pink:#ec5c9a;--purple:#8869dd;--bg:#eaf8f4}
+*{box-sizing:border-box}
+html,body{height:100%}
+body{margin:0;font-family:Nunito,'Trebuchet MS',sans-serif;background:radial-gradient(circle at 15% 15%,#d8fcdb,transparent 40%),radial-gradient(circle at 85% 90%,#d1ddff,transparent 50%),#effaf3;color:var(--ink)}
+button,input{font:inherit}
+button{cursor:pointer;-webkit-tap-highlight-color:transparent}
+button:focus-visible,input:focus-visible{outline:3px solid #275aca;outline-offset:2px}
+.shell{display:flex;justify-content:center;align-items:center;min-height:100vh;padding:18px}
+.phone{width:min(430px,100%);height:min(860px,calc(100dvh - 24px));min-height:580px;border:9px solid #202d46;border-radius:46px;background:#f8fff9;box-shadow:0 20px 70px #273b5270, inset 0 0 0 2px #65728b;overflow:hidden;display:flex;flex-direction:column;position:relative}
+.phone::before{content:'';position:absolute;z-index:8;top:0;left:50%;transform:translateX(-50%);width:112px;height:23px;border-radius:0 0 18px 18px;background:#202d46}
+.status{height:30px;background:#def7ef;display:flex;align-items:center;justify-content:space-between;padding:7px 23px 0;font-weight:900;font-size:12px;z-index:4}
+.screen{flex:1;min-height:0;overflow:auto;scrollbar-width:thin;position:relative;background:linear-gradient(180deg,#dff9e8,#fafff5 67%);padding-bottom:16px}
+.bottom{height:65px;display:flex;justify-content:space-around;align-items:center;background:#fffefbef;box-shadow:0 -5px 18px #3454a120;z-index:4}
+.nav{border:0;border-radius:18px;background:#edf5fa;color:#305275;font-size:24px;width:59px;height:43px}
+.nav.primary{background:#def6e7;color:#0d9478}
+.nav:disabled{opacity:.35;cursor:not-allowed}
+.homehero{position:relative;overflow:hidden;background:linear-gradient(160deg,#82dbff,#bbf5ce 78%);padding:22px 18px 20px;border-radius:0 0 32px 32px;text-align:center}
+.homehero::before,.homehero::after{content:'✿';position:absolute;font-size:90px;color:#fff9;top:24px;left:-20px}
+.homehero::after{content:'☀';left:auto;right:-14px;top:-5px;color:#fff5ad}
+.hero-emoji{font-size:54px;filter:drop-shadow(0 6px 3px #648b7260)}
+h1{font-size:30px;line-height:1.08;margin:5px 0;color:#235476}
+p{line-height:1.48}
+.subtitle{font-size:13px;font-weight:800;color:#40738a;margin:8px 0}
+.appgrid{padding:18px 15px;display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px 8px}
+.app{border:none;background:transparent;text-align:center;padding:0;color:#23445c;font-size:12px;font-weight:900}
+.appicon{width:76px;height:75px;max-width:100%;margin:0 auto 6px;border-radius:22px;background:linear-gradient(145deg,var(--a),var(--b));border:3px solid #ffffffbc;box-shadow:0 6px 0 #34465c25,0 9px 16px #34465c22;display:grid;place-items:center;font-size:39px;transition:transform .15s}
+.app:active .appicon{transform:scale(.91)}
+.appname{line-height:1.18;display:block}
+.card{background:#fff;border:2px solid #eff4f3;border-radius:23px;padding:16px;margin:12px 15px;box-shadow:0 5px 17px #37577513}
+.card h2,.card h3{margin:0 0 9px}
+.small{font-size:13px}
+.muted{color:#6e8393}
+.head{padding:18px 18px 15px;background:linear-gradient(135deg,var(--head,#6ec9b5),#d8f8e8);border-radius:0 0 25px 25px;display:flex;gap:10px;align-items:center}
+.head .glyph{font-size:37px;background:#fff8;border-radius:16px;width:59px;height:59px;display:grid;place-items:center}
+.head h2{font-size:22px;line-height:1.1;margin:0}.head .small{margin-top:5px}
+.pill{display:inline-flex;align-items:center;gap:5px;border-radius:14px;padding:6px 10px;font-size:12px;font-weight:900;background:#eaf8f1;color:#188b75}
+.step{display:flex;gap:10px;align-items:flex-start;margin:13px 0;font-size:14px;line-height:1.4}
+.num{flex:none;background:#72ca94;color:#fff;width:27px;height:27px;border-radius:50%;display:grid;place-items:center;font-weight:900}
+.btn{border:0;background:linear-gradient(135deg,#41cda2,#159e78);color:white;padding:13px 17px;border-radius:17px;font-weight:900;box-shadow:0 5px 0 #138765;transition:transform .15s}
+.btn:active{transform:translateY(3px);box-shadow:0 2px 0 #138765}.btn.secondary{background:#e9f0fc;color:#315e94;box-shadow:0 4px 0 #cbd9ed}.btn.wide{width:100%}
+.word{display:flex;justify-content:center;flex-wrap:wrap;gap:1px;margin:15px 0 10px;font-size:27px;font-weight:900;letter-spacing:.15px}
+.part{display:inline-block;padding:2px 1px 4px;position:relative;border-bottom:4px solid transparent}.part.p{color:#ef6b5e;border-bottom-color:#ef6b5e}.part.r{color:#249d67;border-bottom-color:#249d67}.part.s{color:#4388db;border-bottom-color:#4388db}.part.e{color:#ae62cf;border:2px solid #ae62cf;border-radius:3px;padding:0 3px}.part.r::before{content:'';position:absolute;left:7%;right:7%;top:-7px;height:11px;border-top:2.5px solid currentColor;border-radius:50%}.part.s::before{content:'⌃';position:absolute;top:-19px;left:40%;font-size:18px}
+.legend{display:flex;flex-wrap:wrap;gap:7px;justify-content:center}.legend span{background:#f4f8fc;border-radius:8px;font-size:11px;font-weight:900;padding:5px 7px}
+.levels{padding-top:7px}.level{display:flex;gap:15px;align-items:center;text-align:left;width:calc(100% - 30px);margin:14px 15px;padding:17px 14px;border:2px solid white;border-radius:22px;box-shadow:0 5px 12px #32617421;color:#1e3b5c}.level .emoji{font-size:43px}.level strong{font-size:18px}.level small{display:block;font-weight:700;font-size:12px;margin-top:4px}
+.bar{height:10px;border-radius:10px;background:#e6eaf4;overflow:hidden;margin:9px 0}.fill{height:100%;background:linear-gradient(90deg,#69d89d,#28a6be);border-radius:10px}
+.feedback{border-radius:16px;background:#e8f8ef;padding:13px;font-weight:800;text-align:center;margin-top:12px;font-size:14px}.feedback.bad{background:#fff0e9;color:#a24c20}
+.dictalpha{display:flex;flex-wrap:wrap;gap:7px;padding:14px}.letter{border:1px solid #c9e4da;background:white;border-radius:11px;width:38px;height:40px;font-weight:900;font-size:17px;color:#335b6d}.letter.active{background:#43bf9b;color:white}
+.words{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:0 15px}.wordbtn{background:#fff;border:1px solid #dce9ed;border-radius:12px;padding:11px 7px;font-weight:800;color:#285578;white-space:normal;overflow-wrap:anywhere}
+.search{width:calc(100% - 30px);margin:15px 15px 4px;border:2px solid #c8e7dd;padding:11px 14px;border-radius:16px;background:#fff}
+.note{font-size:12px;color:#62758e}.star{font-size:28px;color:#efa52d}.banner{padding:10px 14px;margin:12px 15px;border-radius:17px;background:#f0fff6;font-size:13px;font-weight:800}.cent{text-align:center}.empty{padding:24px;text-align:center;color:#65768b}.trophy{font-size:72px;text-align:center;margin:18px}
+.toast{position:absolute;z-index:14;left:12%;right:12%;bottom:83px;background:#263d58;color:white;border-radius:15px;text-align:center;padding:11px;font-weight:800;box-shadow:0 6px 20px #2839474c;pointer-events:none;animation:toastFade 1.3s ease forwards}
+@keyframes toastFade{0%{opacity:0;transform:translateY(10px)}15%,75%{opacity:1;transform:translateY(0)}100%{opacity:0;transform:translateY(8px)}}
+.screen::-webkit-scrollbar{width:5px}.screen::-webkit-scrollbar-thumb{background:#b6ded0;border-radius:10px}
+.taskword{font-size:34px;font-weight:900;letter-spacing:1px;text-align:center;color:#23445c;margin:8px 0 16px}
+.goalbox{display:flex;justify-content:center;margin:10px 0 14px}.goalbox .pill{font-size:14px;padding:9px 12px;border-radius:16px}
+.drop-row{display:flex;justify-content:center;gap:8px;flex-wrap:wrap;margin:12px 0 16px;min-height:58px}
+.drop-slot{width:46px;height:52px;border-radius:14px;border:2px dashed #9fd5c2;background:#f7fffb;display:grid;place-items:center;box-shadow:inset 0 2px 0 #ffffff;position:relative}
+.drop-slot.filled{border-style:solid;background:#fffdf3}.drop-slot.active{border-color:#4b9fff;transform:scale(1.03)}.drop-slot .hintidx{position:absolute;bottom:4px;right:6px;font-size:10px;color:#adc3ce;font-weight:900}
+.bankwrap{background:#f4f8ff;border-radius:20px;padding:12px 10px 10px;margin-top:8px}.banktitle{text-align:center;font-size:12px;font-weight:900;color:#58708f;margin-bottom:8px}.letter-bank{display:flex;justify-content:center;flex-wrap:wrap;gap:10px;min-height:56px}
+.dragTile{width:44px;height:48px;border:none;border-radius:14px;background:linear-gradient(180deg,#fff,#f7fff8);box-shadow:0 4px 0 #cddfda,0 6px 14px #23445c18;color:#23445c;font-size:26px;font-weight:900;display:grid;place-items:center;touch-action:none;user-select:none;-webkit-user-select:none}
+.dragTile.in-slot{width:40px;height:44px;font-size:24px;box-shadow:0 3px 0 #d9d9ce;color:#2c536f}.dragTile:active{transform:translateY(2px)}.dragging-float{position:fixed;z-index:9999;pointer-events:none;opacity:.95;transform:translate(-50%,-50%) scale(1.06)}
+.controls{display:flex;gap:10px;margin-top:14px}.controls .btn{flex:1}.helper{background:#fffaf0;border:2px dashed #ffd48d;border-radius:16px;padding:11px 12px;margin-top:12px;font-size:13px;font-weight:800;color:#7b5a19}
+@media (max-width:380px){.drop-slot{width:42px;height:50px}.dragTile{width:40px;height:46px;font-size:24px}}
+
+.morph-fields{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:9px;margin:14px 0}.morph-field{border:2px solid #ffffff;background:var(--field);border-radius:17px;padding:9px 5px;min-height:104px;text-align:center;box-shadow:0 4px 10px #23445c13}.field-label{display:flex;justify-content:center;align-items:center;gap:5px;font-size:12px;margin-bottom:10px}.mark-icon{font-size:23px;line-height:20px;font-weight:900}.mark-icon.p{color:#ed7765}.mark-icon.r{color:#2eae6c}.mark-icon.s{color:#4388db}.mark-icon.e{color:#a251d2}.field-slots{display:flex;justify-content:flex-start;align-items:center;gap:3px;flex-wrap:wrap;min-height:52px;padding:6px;border:2px dashed #b9d9d5;border-radius:12px;background:#ffffff95;cursor:pointer}.field-slots .dragTile.in-slot{width:27px;height:32px;border-radius:7px;font-size:20px}.empty-field{font-size:12px;color:#77919e;font-weight:800;padding-top:11px}.exercise{padding:12px}.exercise .taskword{font-size:30px;margin:7px 0}.exercise .bankwrap{padding:10px 6px}.exercise .letter-bank{gap:6px}.exercise .letter-bank .dragTile{width:36px;height:42px;font-size:23px}.exercise .controls{gap:7px}.exercise .controls .btn{padding:10px 8px;font-size:13px}.exercise .controls .btn:last-child{flex:2}.field-slots.drop-slot{width:100%;height:auto;min-height:52px;display:flex;box-shadow:none}.dragTile.selected{outline:3px solid #258fcf;background:#dcf4ff}.field-slots.selectable{border-color:#258fcf}
+</style>
+</head>
+<body>
+<main class="shell">
+  <div class="phone" aria-label="Игровой смартфон">
+    <div class="status"><span id="clock">09:41</span><span>●●● ▰ ▣</span></div>
+    <section class="screen" id="screen"></section>
+    <div class="bottom">
+      <button class="nav" id="back" title="Назад" aria-label="Назад">‹</button>
+      <button class="nav primary" id="home" title="На главный экран" aria-label="Главный экран">⌂</button>
+      <button class="nav" id="forward" title="Вперёд" aria-label="Вперёд">›</button>
+    </div>
+    <div id="toastHost"></div>
+  </div>
+</main>
+<script>
+const PARTS={p:{name:'Приставка',icon:'🏠',color:'#7fd796',what:'Приставка — значимая часть слова, которая стоит перед корнем и служит для образования новых слов.',how:['Подбери родственные слова и найди их общую часть — корень.','Посмотри, есть ли перед корнем отдельная часть.','Сравни слова: ход — вход — выход. Части в- и вы- — приставки.'],tip:'Не путай приставку с предлогом: предлог пишется отдельно.'},r:{name:'Корень',icon:'🌳',color:'#ffb963',what:'Корень — главная значимая часть слова, в которой заключено общее значение родственных слов.',how:['Подбери родственные слова: лес, лесной, лесник.','Найди общую по смыслу и написанию часть.','Проверь, что слова действительно родственны, а не просто похожи.'],tip:'У однокоренных слов корни иногда чередуются: снег — снежок.'},s:{name:'Суффикс',icon:'🌱',color:'#7fcaff',what:'Суффикс — значимая часть слова, которая обычно стоит после корня и служит для образования новых слов.',how:['Найди окончание (если оно есть) и корень.','Посмотри, есть ли между корнем и окончанием часть слова.','Сравни однокоренные слова: лес — лесник. В слове «лесник» -ник- — суффикс.'],tip:'В некоторых словах суффиксов нет, а в других их несколько.'},e:{name:'Окончание',icon:'🎁',color:'#d8b2ff',what:'Окончание — изменяемая часть слова, которая образует формы слова и связывает слова в предложении.',how:['Измени слово по числам, падежам или родам: школа — школы — школе.','Сравни, какая часть слова изменилась.','Выдели изменяемую часть: школ-а, школ-ы.'],tip:'У некоторых слов окончание нулевое: стол□ — стола. Не путай его с отсутствием окончания.'}};
+// Авторские учебные примеры. p = приставка, r = корень, s = суффикс, e = окончание.
+const RAW=[
+['абрикос','','абрикос','',''],['автобус','','автобус','',''],['арбуз','','арбуз','',''],['баран','','баран','',''],['берёза','','берёз','', 'а'],['берёзка','','берёз','к','а'],['билет','','билет','',''],['брат','','брат','',''],['бумага','','бумаг','','а'],['ваза','','ваз','','а'],['вагон','','вагон','',''],['весна','','весн','','а'],['ветер','','ветер','',''],['веточка','','вет','очк','а'],['вода','','вод','','а'],['водный','','вод','н','ый'],['водичка','','вод','ичк','а'],['вход','в','ход','',''],['выход','вы','ход','',''],['выходы','вы','ход','','ы'],['входы','в','ход','','ы'],['переходы','пере','ход','','ы'],['заходы','за','ход','','ы'],['уходы','у','ход','','ы'],['расходы','рас','ход','','ы'],['подходы','под','ход','','ы'],['отходы','от','ход','','ы'],['проходы','про','ход','','ы'],['заплывы','за','плыв','','ы'],['газета','','газет','','а'],['глаз','','глаз','',''],['гора','','гор','','а'],['горка','','гор','к','а'],['город','','город','',''],['городок','','город','ок',''],['гриб','','гриб','',''],['грибок','','гриб','ок',''],['грибной','','гриб','н','ой'],['груша','','груш','','а'],['дача','','дач','','а'],['двор','','двор','',''],['дворик','','двор','ик',''],['дерево','','дерев','','о'],['дом','','дом','',''],['домик','','дом','ик',''],['домишко','','дом','ишк','о'],['дорога','','дорог','','а'],['дорожка','','дорож','к','а'],['друг','','друг','',''],['дружба','','друж','б','а'],['дым','','дым','',''],['дымок','','дым','ок',''],['ёж','','ёж','',''],['ёлка','','ёл','к','а'],['железо','','желез','','о'],['живот','','живот','',''],['завод','','завод','',''],['загородный','за','город','н','ый'],['закат','за','кат','',''],['заморозки','за','мороз','к','и'],['заплыв','за','плыв','',''],['звезда','','звезд','','а'],['звёздочка','','звёзд','очк','а'],['зима','','зим','','а'],['зимний','','зим','н','ий'],['зимушка','','зим','ушк','а'],['игра','','игр','','а'],['игрушка','','игр','ушк','а'],['капуста','','капуст','','а'],['картина','','картин','','а'],['книга','','книг','','а'],['книжка','','книж','к','а'],['книжный','','книж','н','ый'],['кот','','кот','',''],['котик','','кот','ик',''],['котёнок','','кот','ёнок',''],['краска','','крас','к','а'],['круг','','круг','',''],['кружок','','круж','ок',''],['куст','','куст','',''],['кустик','','куст','ик',''],['лес','','лес','',''],['лесок','','лес','ок',''],['лесной','','лес','н','ой'],['лесник','','лес','ник',''],['лист','','лист','',''],['листик','','лист','ик',''],['листок','','лист','ок',''],['луг','','луг','',''],['луговой','','луг','ов','ой'],['луна','','лун','','а'],['луч','','луч','',''],['лучик','','луч','ик',''],['малина','','малин','','а'],['малинка','','малин','к','а'],['мама','','мам','','а'],['машина','','машин','','а'],['машинка','','машин','к','а'],['мир','','мир','',''],['море','','мор','','е'],['морской','','мор','ск','ой'],['моряк','','мор','як',''],['мороз','','мороз','',''],['морозный','','мороз','н','ый'],['мост','','мост','',''],['мостик','','мост','ик',''],['музыка','','музык','','а'],['нос','','нос','',''],['носик','','нос','ик',''],['носовой','','нос','ов','ой'],['обход','об','ход','',''],['облачко','','облач','к','о'],['окно','','окн','','о'],['орех','','орех','',''],['орешек','','ореш','ек',''],['отход','от','ход','',''],['парк','','парк','',''],['парковый','','парк','ов','ый'],['перелесок','пере','лес','ок',''],['переход','пере','ход','',''],['переходный','пере','ход','н','ый'],['переписка','пере','пис','к','а'],['подводный','под','вод','н','ый'],['подберёзовик','под','берёз','овик',''],['подземный','под','зем','н','ый'],['подснежник','под','снеж','ник',''],['поле','','пол','','е'],['полюшко','','пол','юшк','о'],['приморский','при','мор','ск','ий'],['прогулка','про','гул','к','а'],['разговор','раз','говор','',''],['рассвет','рас','свет','',''],['рассказ','рас','сказ','',''],['река','','рек','','а'],['речка','','реч','к','а'],['рыба','','рыб','','а'],['рыбак','','рыб','ак',''],['рыбка','','рыб','к','а'],['рыбный','','рыб','н','ый'],['сад','','сад','',''],['садик','','сад','ик',''],['садовый','','сад','ов','ый'],['свет','','свет','',''],['снежинка','','снеж','инк','а'],['снег','','снег','',''],['снеговик','','снег','овик',''],['снежок','','снеж','ок',''],['сосна','','сосн','','а'],['сосновый','','сосн','ов','ый'],['стол','','стол','',''],['столик','','стол','ик',''],['столовый','','стол','ов','ый'],['страна','','стран','','а'],['трава','','трав','','а'],['травка','','трав','к','а'],['туман','','туман','',''],['уход','у','ход','',''],['ученик','','учен','ик',''],['цвет','','цвет','',''],['цветик','','цвет','ик',''],['цветок','','цвет','ок',''],['цветочный','','цвет','очн','ый'],['чай','','чай','',''],['чайник','','чай','ник',''],['часы','','час','','ы'],['школа','','школ','','а'],['школьный','','школь','н','ый'],['школьник','','школь','ник',''],['шум','','шум','',''],['шумный','','шум','н','ый'],['щука','','щук','','а'],['ягода','','ягод','','а'],['ягодка','','ягод','к','а'],['язык','','язык','','']
+];
+
+// Дополнительные слова для разнообразия учебных тренировок.
+RAW.push(
+ ['выезды','вы','езд','','ы'],
+ ['забеги','за','бег','','и'],
+ ['перелёты','пере','лёт','','ы'],
+ ['переводы','пере','вод','','ы'],
+ ['посевы','по','сев','','ы'],
+ ['привозы','при','воз','','ы'],
+ ['выносы','вы','нос','','ы'],
+ ['подкаты','под','кат','','ы']
+);
+const WORDS=RAW.map(([w,p,r,s,e])=>({w,p,r,s,e}));
+let state={page:'home',topic:'p',letter:'А',word:WORDS[0],level:1,question:0,step:0,mistakes:0,message:'',completed:false,search:'',slots:[],available:[],drag:null,helper:''};
+let trail=[],future=[];
+let saved={stars:0,best:{1:0,2:0,3:0},played:0};
+try{saved={...saved,...JSON.parse(localStorage.getItem('morphophone-progress')||'{}')}}catch(e){}
+const $=x=>document.getElementById(x), esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+let rounds=[];
+let tileCounter=0;
+function persist(){try{localStorage.setItem('morphophone-progress',JSON.stringify(saved))}catch(e){}}
+function shuffle(arr){return [...arr].sort(()=>Math.random()-.5)}
+function clone(obj){return JSON.parse(JSON.stringify({...obj,drag:null}))}
+function navigate(page,extra={}){trail.push(clone(state));future=[];state={...state,...extra,page};render()}
+function back(){if(!trail.length)return;future.push(clone(state));state=trail.pop();render()}
+function forward(){if(!future.length)return;trail.push(clone(state));state=future.pop();render()}
+function home(){if(state.page!=='home')navigate('home')}
+function showToast(text){const host=$('toastHost');host.innerHTML=`<div class="toast">${esc(text)}</div>`;setTimeout(()=>{host.innerHTML=''},1350)}
+const levelWords=l=>WORDS.filter(w=>l===1?!w.p&&!w.s&&!!w.e:l===2?!!w.p&&!w.s&&!!w.e:!!w.p&&!!w.s&&!!w.e);
+// A varied selection without repeating words from the same root when possible.
+function variedPick(pool,count,usedRoots=new Set()){
+  const result=[];
+  const options=shuffle(pool);
+  for(const word of options){
+    if(result.length>=count) break;
+    if(usedRoots.has(word.r)) continue;
+    result.push(word);usedRoots.add(word.r);
+  }
+  for(const word of options){if(result.length>=count)break;if(!result.includes(word)){result.push(word);usedRoots.add(word.r)}}
+  return result;
+}
+function levelRounds(l){
+  if(l===1)return variedPick(levelWords(1),8);
+  if(l===2)return variedPick(levelWords(2),8);
+  const groups=[
+    WORDS.filter(w=>!w.p&&!w.s&&w.e),
+    WORDS.filter(w=>!!w.p&&!w.s),
+    WORDS.filter(w=>!w.p&&!!w.s),
+    WORDS.filter(w=>!!w.p&&!!w.s)
+  ];
+  const used=new Set();
+  const selected=groups.flatMap(group=>variedPick(group,2,used));
+  const extra=variedPick(WORDS.filter(w=>!selected.includes(w)&&w.e),2,used);
+  return shuffle([...selected,...extra]);
+}
+const seq=w=>['p','r','s','e'].filter(x=>w[x] && (state.level===1?['r','e'].includes(x):state.level===2?['p','r','e'].includes(x):true));
+function wordMarkup(w){return `<div class="word">${['p','r','s','e'].filter(k=>w[k]).map(k=>`<span class="part ${k}" title="${PARTS[k].name}">${esc(w[k])}</span>`).join('')}${!w.e?'<span style="font-size:18px;color:#ae62cf;margin-left:2px">□</span>':''}</div>`}
+function legend(w){return `<div class="legend">${['p','r','s','e'].filter(k=>w[k]).map(k=>`<span style="color:${{p:'#df5b50',r:'#198755',s:'#327ac7',e:'#a550ca'}[k]}">${PARTS[k].name.toLowerCase()}: ${esc(w[k])}</span>`).join('')}${!w.e?'<span>нулевое окончание □</span>':''}</div>`}
+function app(icon,name,a,b,action){return `<button class="app" data-action="${action}"><span class="appicon" style="--a:${a};--b:${b}">${icon}</span><span class="appname">${name}</span></button>`}
+function head(emoji,title,subtitle,color){return `<div class="head" style="--head:${color}"><div class="glyph">${emoji}</div><div><h2>${title}</h2><div class="small">${subtitle}</div></div></div>`}
+function pageHome(){return `<div class="homehero"><div class="hero-emoji">📱🌲</div><h1>МорфоФон</h1><div class="subtitle">Волшебный мир частей слова ✨</div><span class="pill">⭐ ${saved.stars} звёзд собрано</span></div><div class="appgrid">${app('🏠','Приставка','#5de19c','#19a770','topic:p')}${app('🌳','Корень','#ffd273','#f39131','topic:r')}${app('🌱','Суффикс','#99e8ff','#4a98f3','topic:s')}${app('🎁','Окончание','#e5b7ff','#a878ef','topic:e')}${app('📖','Полный разбор','#ffaaa2','#e65762','full')}${app('📚','Словарь','#ffd46b','#ec963c','dictionary')}${app('🎮','Тренировка','#c2b7ff','#8471ed','levels')}${app('🏆','Мои успехи','#ffd86c','#f39835','achievements')}${app('💡','Шпаргалка','#9fe5df','#46bfb5','cheat')}</div>`}
+function pageTopic(){let x=PARTS[state.topic],example={p:WORDS.find(w=>w.w==='переход'),r:WORDS.find(w=>w.w==='лесной'),s:WORDS.find(w=>w.w==='лесник'),e:WORDS.find(w=>w.w==='школа')}[state.topic];return head(x.icon,x.name,'Узнай правило и потренируйся',x.color)+`<div class="card"><h3>📌 Что это такое?</h3><p>${x.what}</p></div><div class="card"><h3>🔍 Как найти?</h3>${x.how.map((t,i)=>`<div class="step"><div class="num">${i+1}</div><div>${esc(t)}</div></div>`).join('')}</div><div class="card"><h3>✏️ Пример</h3>${wordMarkup(example)}${legend(example)}<p class="note">${x.tip}</p></div><div style="margin:15px"><button class="btn wide" data-action="levels">🎮 Потренироваться</button></div>`}
+function pageFull(){let w=WORDS.find(w=>w.w==='подводный');let steps=['Измени слово и найди окончание: подводный — подводная — подводное.','Отбрось окончание и найди основу слова.','Подбери родственные слова и выдели корень: вода, водный, подводный.','Найди часть перед корнем: под- — приставка.','Найди часть после корня, перед окончанием: -н- — суффикс.'];return head('📖','Разбор по составу','Пошаговая инструкция','#ff9fa2')+`<div class="card"><h3>В каком порядке разбирать?</h3>${steps.map((x,i)=>`<div class="step"><div class="num">${i+1}</div><div>${x}</div></div>`).join('')}</div><div class="card"><h3>Разберём слово «подводный»</h3>${wordMarkup(w)}${legend(w)}<p class="small">Основа — <b>подводн-</b>. Окончание — <b>-ый</b>. Корень — <b>-вод-</b>. Приставка — <b>под-</b>. Суффикс — <b>-н-</b>.</p></div><div class="card"><h3>⚠️ Важно помнить</h3><p>В слове может не быть приставки или суффикса. У изменяемого слова бывает нулевое окончание, а неизменяемые слова окончания не имеют.</p></div>`}
+const LETTERS='А Б В Г Д Е Ё Ж З И Й К Л М Н О П Р С Т У Ф Х Ц Ч Ш Щ Э Ю Я'.split(' ');
+function pageDictionary(){const query=state.search.trim().toLocaleLowerCase('ru');let filtered=WORDS.filter(w=>query?w.w.includes(query):w.w.toLocaleUpperCase('ru').startsWith(state.letter));return head('📚','Словарь','Слова по алфавиту и их состав','#ffcf68')+`<input id="dictsearch" class="search" placeholder="🔎 Найти слово…" value="${esc(state.search)}" aria-label="Поиск слова"/><div class="dictalpha">${LETTERS.map(l=>`<button class="letter ${l===state.letter&&!query?'active':''}" data-action="letter:${l}">${l}</button>`).join('')}</div><div class="banner">${query?'Результаты поиска':'Буква '+state.letter}: ${filtered.length} слов(а)</div>${filtered.length?`<div class="words">${filtered.map(w=>`<button class="wordbtn" data-action="word:${WORDS.indexOf(w)}">${esc(w.w)} ↗</button>`).join('')}</div>`:'<div class="empty">Здесь пока нет слов. Выбери другую букву или введи слово.</div>'}`}
+function pageWord(){let w=state.word;return head('🔎',w.w,'Разбор слова по составу','#9ecaf8')+`<div class="card"><h3 class="cent">Состав слова</h3>${wordMarkup(w)}${legend(w)}</div><div class="card"><h3>📝 Подробный разбор</h3>${['p','r','s','e'].map(k=>`<div class="step"><span style="font-size:23px">${PARTS[k].icon}</span><div><b>${PARTS[k].name}:</b> ${w[k]?'<b>'+esc(w[k])+'</b>':k==='e'?'нулевое (□)':'нет'}</div></div>`).join('')}<p class="small">Основа: <strong>${esc(w.p+w.r+w.s)}</strong></p></div><div style="margin:15px"><button class="btn wide" data-action="dictionary">← Вернуться в словарь</button></div>`}
+function pageLevels(){let defs=[['🌼','1 уровень','Корень и окончание','Простые слова','#d5f8bf'],['🏡','2 уровень','Приставка, корень, окончание','Три части слова','#c2e8fc'],['🏆','3 уровень','Смешанные слова','С приставками, суффиксами и без них','#f9cde3']];return head('🎮','Тренировка','Распредели буквы по частям слова','#c9b5ff')+`<div class="levels">${defs.map((v,i)=>`<button class="level" style="background:${v[4]}" data-action="start:${i+1}"><span class="emoji">${v[0]}</span><span><strong>${v[1]}</strong><small>${v[2]}</small><small>🏅 Рекорд: ${saved.best[i+1]||0}/${i===2?10:8}</small></span><span style="margin-left:auto;font-size:22px">›</span></button>`).join('')}</div>`}
+function currentInfo(){const w=rounds[state.question];return w?{w,keys:['p','r','s','e'],answer:w.w}:null}
+
+function preparePuzzle(){const info=currentInfo();if(!info)return;state.available=[...info.w.w].map(ch=>({id:++tileCounter,ch}));state.slots=Object.fromEntries(['p','r','s','e'].map(k=>[k,[]]));state.message='';state.helper='';state.selectedTile=null}
+
+function startLevel(l){rounds=levelRounds(l);navigate('play',{level:l,question:0,step:0,mistakes:0,message:'',completed:false,slots:[],available:[],helper:''});preparePuzzle();render()}
+function moveTileToSlot(id,part){if(!['p','r','s','e'].includes(part))return false;let tile=null;const bankIndex=state.available.findIndex(t=>t.id===id);if(bankIndex>=0){tile=state.available.splice(bankIndex,1)[0]}else{for(const k of ['p','r','s','e']){const i=state.slots[k].findIndex(t=>t.id===id);if(i>=0){tile=state.slots[k].splice(i,1)[0];break}}}if(!tile)return false;state.slots[part].push(tile);return true}
+function moveTileToBank(id){for(const k of ['p','r','s','e']){const i=state.slots[k].findIndex(t=>t.id===id);if(i>=0){state.available.push(state.slots[k].splice(i,1)[0]);state.available.sort((a,b)=>a.id-b.id);return true}}return false}
+function handleBankClick(id){state.selectedTile=id;render()}
+function checkAnswer(){const info=currentInfo();if(!info)return;if(state.available.length){state.message='Перенеси все буквы в поля.';render();return}const wrong=['p','r','s','e'].some(k=>state.slots[k].map(t=>t.ch).join('')!==info.w[k]);if(wrong){state.mistakes++;state.message='Попробуй ещё! Проверь расположение букв.';render();return}state.question++;showToast('Правильно! 🌟');if(state.question>=rounds.length){const score=Math.max(1,3-Math.floor(state.mistakes/4));saved.stars+=score;saved.played++;saved.best[state.level]=Math.max(saved.best[state.level]||0,rounds.length-state.mistakes);persist();state.page='results';state.awarded=score;render();return}preparePuzzle();render()}
+
+function resetPuzzle(){preparePuzzle();render()}
+
+function pagePlay(){const info=currentInfo();if(!info)return pageResults();const w=info.w;const parts=['p','r','s','e'];const colors={p:'#fce7e2',r:'#ddf7e8',s:'#e0f1ff',e:'#f3e6ff'};const fields=parts.map(k=>{const tiles=state.slots[k]||[];return `<div class="morph-field" style="--field:${colors[k]}" data-part="${k}"><div class="field-label"><span class="mark-icon ${k}">${{p:'¬',r:'⌒',s:'⌃',e:'□'}[k]}</span><strong>${PARTS[k].name}</strong></div><div class="field-slots drop-slot ${state.selectedTile?'selectable':''}" data-part="${k}">${tiles.map(tile=>`<button class="dragTile in-slot" data-tile="${tile.id}" data-from="slot" aria-label="Буква ${esc(tile.ch)}, переместить">${esc(tile.ch)}</button>`).join('')}</div></div>`}).join('');return head('🎯','Уровень '+state.level,`Слово ${state.question+1} из ${rounds.length}`,'#9ce2ff')+`<div class="card exercise"><div class="bar"><div class="fill" style="width:${state.question/rounds.length*100}%"></div></div><div class="taskword">${esc(w.w)}</div><div class="morph-fields">${fields}</div><div class="bankwrap"><div class="banktitle">БУКВЫ СЛОВА</div><div class="letter-bank" id="bankArea">${state.available.map(tile=>`<button class="dragTile ${state.selectedTile===tile.id?'selected':''}" data-tile="${tile.id}" data-from="bank">${esc(tile.ch)}</button>`).join('')}</div></div>${state.message?`<div class="feedback bad">${esc(state.message)}</div>`:''}<div class="controls"><button class="btn secondary" data-action="resetpuzzle">↻</button><button class="btn" data-action="check">Проверить ✓</button></div></div>`}
+function pageResults(){return head('🏆','Уровень пройден!','Ты справился отлично','#fee093')+`<div class="card cent"><div class="trophy">🏆</div><h2>Молодец!</h2><div class="star">${'⭐'.repeat(state.awarded||1)}</div><p>Разобрано слов: ${rounds.length}. Получено звёзд: ${state.awarded||1}.</p><p class="small">Ошибок: ${state.mistakes}.</p><button class="btn wide" data-action="start:${state.level}">🔄 Пройти ещё раз</button><div style="height:12px"></div><button class="btn secondary wide" data-action="levels">К выбору уровней</button></div>`}
+function pageAchievements(){return head('🏆','Мои успехи','Твои достижения сохраняются','#ffe397')+`<div class="card cent"><div class="trophy">🌟</div><h2>${saved.stars} звёзд</h2><p>Всего пройдено тренировок: <b>${saved.played}</b></p></div>${[1,2,3].map(l=>`<div class="card"><h3>Уровень ${l} ${saved.best[l]>=(l===3?10:8)?'🥇':'✨'}</h3><div class="bar"><div class="fill" style="width:${Math.min(100,(saved.best[l]||0)/(l===3?10:8)*100)}%"></div></div><span class="small">Лучший результат: ${saved.best[l]||0}/${l===3?10:8}</span></div>`).join('')}`}
+function pageCheat(){return head('💡','Шпаргалка','Повтори всё за минуту','#a0e9dd')+`<div class="card"><h3>🎓 Порядок разбора</h3>${['Измени слово и выдели окончание.','Найди основу (часть без окончания).','Подбери однокоренные слова и найди корень.','Найди приставку перед корнем.','Найди суффикс после корня.'].map((s,i)=>`<div class="step"><div class="num">${i+1}</div><div>${s}</div></div>`).join('')}</div><div class="card"><h3>🖍 Цветные обозначения</h3>${wordMarkup(WORDS.find(w=>w.w==='подводный'))}${legend(WORDS.find(w=>w.w==='подводный'))}</div><div class="card"><h3>🧠 Как не ошибиться</h3><p class="small">Окончание ищем, когда изменяем форму слова. Корень ищем по родственным словам. Приставка стоит перед корнем, а суффикс обычно после него.</p></div>`}
+function render(){let pages={home:pageHome,topic:pageTopic,full:pageFull,dictionary:pageDictionary,word:pageWord,levels:pageLevels,play:pagePlay,results:pageResults,achievements:pageAchievements,cheat:pageCheat};$('screen').innerHTML=(pages[state.page]||pageHome)();$('back').disabled=!trail.length;$('forward').disabled=!future.length;document.title=(state.page==='home'?'МорфоФон':$('screen').querySelector('h2')?.textContent||'МорфоФон')+' — МорфоФон';}
+function handleAction(name,val){if(name==='topic')navigate('topic',{topic:val});else if(name==='start')startLevel(Number(val));else if(name==='letter'){state.letter=val;state.search='';render()}else if(name==='word')navigate('word',{word:WORDS[Number(val)]});else if(name==='resetpuzzle')resetPuzzle();else if(name==='check')checkAnswer();else navigate(name)}
+$('screen').addEventListener('click',e=>{const b=e.target.closest('[data-action]');if(b){const [name,val]=b.dataset.action.split(':');handleAction(name,val);return}const tile=e.target.closest('.dragTile');if(tile){const id=Number(tile.dataset.tile);if(tile.dataset.from==='bank')handleBankClick(id);else {state.selectedTile=id;render()}return}const field=e.target.closest('.drop-slot[data-part]');if(field&&state.selectedTile){moveTileToSlot(state.selectedTile,field.dataset.part);state.selectedTile=null;render()}});
+$('screen').addEventListener('input',e=>{if(e.target.id==='dictsearch'){const pos=e.target.selectionStart;state.search=e.target.value;render();const field=$('dictsearch');field.focus();field.setSelectionRange(pos,pos)}});
+function startDrag(el,clientX,clientY){const tileId=Number(el.dataset.tile);const origin=el.dataset.from;const rect=el.getBoundingClientRect();const ghost=el.cloneNode(true);ghost.classList.add('dragging-float');ghost.style.width=rect.width+'px';ghost.style.height=rect.height+'px';ghost.style.left=clientX+'px';ghost.style.top=clientY+'px';document.body.appendChild(ghost);state.drag={tileId,origin,ghost,startX:clientX,startY:clientY}}
+function moveDrag(clientX,clientY){if(!state.drag?.ghost)return;state.drag.ghost.style.left=clientX+'px';state.drag.ghost.style.top=clientY+'px';document.querySelectorAll('.drop-slot').forEach(s=>s.classList.remove('active'));const el=document.elementFromPoint(clientX,clientY)?.closest('.drop-slot');if(el)el.classList.add('active')}
+function endDrag(clientX,clientY){if(!state.drag)return;const drag=state.drag;document.querySelectorAll('.drop-slot').forEach(s=>s.classList.remove('active'));const target=document.elementFromPoint(clientX,clientY);const slot=target?.closest('.drop-slot');const bank=target?.closest('#bankArea');if(slot){moveTileToSlot(drag.tileId,slot.dataset.part);render()}else if(bank&&drag.origin==='slot'){moveTileToBank(drag.tileId);render()}else if(Math.hypot(clientX-drag.startX,clientY-drag.startY)<9){if(drag.origin==='slot')moveTileToBank(drag.tileId);else handleBankClick(drag.tileId);render()}drag.ghost?.remove();state.drag=null}
+$('screen').addEventListener('pointerdown',e=>{const tile=e.target.closest('.dragTile');if(!tile)return;e.preventDefault();startDrag(tile,e.clientX,e.clientY)});
+window.addEventListener('pointermove',e=>{if(state.drag)moveDrag(e.clientX,e.clientY)});
+window.addEventListener('pointerup',e=>{if(state.drag)endDrag(e.clientX,e.clientY)});
+$('back').onclick=back;$('forward').onclick=forward;$('home').onclick=home;document.addEventListener('keydown',e=>{if(e.key==='Escape')back()});
+function tickClock(){const d=new Date();$('clock').textContent=`${String(d.getHours()).padStart(2,'0')}:${String(d.getMinutes()).padStart(2,'0')}`}
+tickClock();setInterval(tickClock,1000);render();
+</script>
+</body>
+</html>
